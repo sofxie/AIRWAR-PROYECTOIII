@@ -9,4 +9,19 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="a2.png" />
+    <None Remove="AntiAirCratf.png" />
+    <None Remove="ba1.png" />
+    <None Remove="BackGround.png" />
+    <None Remove="Imagen\AntiAirCratf.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="AntiAirCratf.png" />
+    <Resource Include="ba1.png" />
+    <Resource Include="BackGround.png" />
+    <Resource Include="Imagen\AntiAirCratf.png" />
+  </ItemGroup>
+
 </Project>

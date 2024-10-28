@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AIRWAR___PROYECTO_III"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="AIR WAR" Height="720" Width="600">
 
-    </Grid>
+    <Canvas RenderTransformOrigin="0.388,0.352" Margin="0,2,0,-18">
+        <Canvas.Background>
+            <ImageBrush ImageSource="/ba1.png"/>
+        </Canvas.Background>
+
+        <Rectangle Height="40" Width="600" Fill="#FFF7D5A2" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Top="-2"/>
+        <Label Content="SCORE"  HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="4"/>
+        <Image x:Name="Player" Height="93" Width="80" Canvas.Left="10" Canvas.Top="615" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Source="/AntiAirCratf.png">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-11.955"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+
+    </Canvas>
 </Window>
