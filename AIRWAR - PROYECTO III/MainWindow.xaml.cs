@@ -10,31 +10,45 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.Windows.Threading;
+using System.Windows.Media.Animation;
 
 namespace AIRWAR___PROYECTO_III
 {
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        int speed = 7; // Velocidad del Movimiento del Jugador
-
-        DispatcherTimer timer = new DispatcherTimer();
+        private GameLogic gameLogic; // Clase aparte para estructurar la logica
+        
         public MainWindow()
         {
             InitializeComponent();
-            
-            timer.Tick += GameTimerEvent; // Timer del Juego
-            timer.Interval = TimeSpan.FromMilliseconds(20);
-            timer.Start();
-        }
 
-        private void GameTimerEvent(object sender, EventArgs e) 
+            Player player = new Player(Player); // Inicia Jugador
+            gameLogic = new GameLogic(MyCanvas, player);  // Inicia Juego
+            gameLogic.StartGame();
+
+            MyCanvas.Focus();
+
+            ImageBrush playerImage = new ImageBrush(); // Dibuja la imagen del jugador
+            playerImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\AntiAirCratf.png"));
+            Player.Fill = playerImage;
+
+        }
+        private void Shoot(object sender, KeyEventArgs e)
         {
-            Canvas.SetLeft(Player, Canvas.GetLeft(Player) - speed);
-            if (Canvas.GetLeft(Player) < 5 || Canvas.GetLeft(Player) + (Player.Width * 2) > Application.Current.MainWindow.Width)
+            if (e.Key == Key.Space)
             {
-                speed = -speed;
+                Rectangle newBullet = new Rectangle
+                {
+                    Height = 20,
+                    Width = 5,
+                    Fill = Brushes.White,
+                    Stroke = Brushes.Red
+                };
+
+                Canvas.SetLeft(newBullet, Canvas.GetLeft(Player) + Player.Width/2);
+                Canvas.SetTop(newBullet, Canvas.GetTop(Player) - newBullet.Height);
+
+                MyCanvas.Children.Add(newBullet);
             }
         }
     }
