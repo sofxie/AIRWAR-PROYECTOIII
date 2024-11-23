@@ -17,39 +17,42 @@ namespace AIRWAR___PROYECTO_III
     public partial class MainWindow : Window
     {
         private GameLogic gameLogic; // Clase aparte para estructurar la logica
-        
+        private DateTime SpaceTime; // Tiempo de inicio al presionar clic
+        private bool ClickSpace = false; // El click esta presionado
+
         public MainWindow()
         {
             InitializeComponent();
 
-            Player player = new Player(Player); // Inicia Jugador
+            Player player = new Player(Player, MyCanvas); // Inicia Jugador
             gameLogic = new GameLogic(MyCanvas, player);  // Inicia Juego
             gameLogic.StartGame();
 
             MyCanvas.Focus();
 
             ImageBrush playerImage = new ImageBrush(); // Dibuja la imagen del jugador
-            playerImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\AntiAirCratf.png"));
+            playerImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\AntiAirCratf.png"));// Hay que cambiar la ruta
             Player.Fill = playerImage;
-
         }
-        private void Shoot(object sender, KeyEventArgs e)
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space)
+            // Detectar inicio de disparo
+            if (e.Key == Key.Space && !ClickSpace)
             {
-                Rectangle newBullet = new Rectangle
-                {
-                    Height = 20,
-                    Width = 5,
-                    Fill = Brushes.White,
-                    Stroke = Brushes.Red
-                };
-
-                Canvas.SetLeft(newBullet, Canvas.GetLeft(Player) + Player.Width/2);
-                Canvas.SetTop(newBullet, Canvas.GetTop(Player) - newBullet.Height);
-
-                MyCanvas.Children.Add(newBullet);
+                SpaceTime = DateTime.Now;
+                ClickSpace = true;
             }
+        }
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            // Detectar disparo al soltar Space
+            if (e.Key == Key.Space && ClickSpace)
+            {
+                TimeSpan pressDuration = DateTime.Now - SpaceTime;
+
+                gameLogic.player.Shoot(pressDuration.TotalMilliseconds);
+                ClickSpace = false;
+            } 
         }
     }
 }

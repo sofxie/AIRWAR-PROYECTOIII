@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace AIRWAR___PROYECTO_III
@@ -14,29 +17,71 @@ namespace AIRWAR___PROYECTO_III
     {
         private DispatcherTimer timer;
         private Canvas gameCanvas;
-        private Player player;
+        private double PSpeed = 5;
+        public Player player;
+        private int score = 0;
+        private int time = 60;
 
+        public event Action<int> Score; 
+        public event Action<int> Time;   
+        public event Action GameOver;
         public GameLogic(Canvas canvas, Player player)
         {
             gameCanvas = canvas;
             this.player = player;
-
-            // Inicializar el temporizador
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(20);
-            timer.Tick += GameTimerEvent;
         }
         public void StartGame()
         {
-            timer.Start();
+            SMovimiento();
+            STimer();
         }
-        public void HandleKeyPress(Key key)
+        private void SMovimiento()
         {
-            return;
+            var movementTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(16) // Aproximadamente 60 FPS
+            };
+
+            movementTimer.Tick += (s, e) =>
+            {
+                player.Move();
+            };
+
+            movementTimer.Start();
         }
-        private void GameTimerEvent(object sender, EventArgs e)
+        private void STimer()
         {
-            player.Move(gameCanvas);
+            var gameTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+
+            gameTimer.Tick += (s, e) =>
+            {
+                if (time > 0)
+                {
+                    time--;
+                    Time?.Invoke(time); // Notificar cambio en el tiempo
+                }
+                else
+                {
+                    gameTimer.Stop();
+                    GameOver?.Invoke(); // Notificar fin del juego
+                }
+            };
+
+            gameTimer.Start();
+        }
+        public void HandleKeyPress(Key key, DateTime pressStartTime, DateTime pressEndTime)
+        {
+            if (key == Key.Space)
+            {
+                // Calcular duración del clic
+                double pressDuration = (pressEndTime - pressStartTime).TotalMilliseconds;
+
+                // Crear bala con velocidad basada en la duración del clic
+                player.Shoot(pressDuration);
+            }
         }
     }
 }
