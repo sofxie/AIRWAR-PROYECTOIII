@@ -29,6 +29,7 @@ namespace AIRWAR___PROYECTO_III
         private List<(double X, double Y)> airportPositions;
         private List<(double X, double Y)> carrierPositions;
         private List<Enemy> enemigos = new List<Enemy>(); // Almacenar los enemigos
+        private List<Line> routeLines = new List<Line>(); // Almacena las líneas de ruta
 
         // Limitar el número de aviones por aeropuerto y portaavión
         private Dictionary<(double X, double Y), int> airportAircraftCount = new Dictionary<(double X, double Y), int>();
@@ -104,7 +105,6 @@ namespace AIRWAR___PROYECTO_III
             gameTimer.Start();
         }
 
-        // Método en GameLogic para iniciar el disparo
         public void HandleKeyPress(Key key, DateTime pressStartTime, DateTime pressEndTime)
         {
             if (key == Key.Space)
@@ -119,12 +119,12 @@ namespace AIRWAR___PROYECTO_III
 
         private void CrearEnemigosDesdePosiciones()
         {
-            // Crear enemigos para cada tupla en airportPositions solo si no se ha alcanzado el límite de 4 aviones
+            // Crear enemigos para cada tupla en airportPositions solo si no se ha alcanzado el límite de 2 aviones
             foreach (var posicion in airportPositions)
             {
-                if (airportAircraftCount[posicion] < 4)
+                if (airportAircraftCount[posicion] < 2)
                 {
-                    EnemigosSpawn(posicion.X, posicion.Y);
+                    EnemigosSpawn(posicion.X, posicion.Y, "Aeropuerto"); // Pasar el origen como Aeropuerto
                     airportAircraftCount[posicion]++; // Incrementar el contador de aviones del aeropuerto
                 }
             }
@@ -134,13 +134,13 @@ namespace AIRWAR___PROYECTO_III
             {
                 if (carrierAircraftCount[posicion] < 2)
                 {
-                    EnemigosSpawn(posicion.X, posicion.Y);
+                    EnemigosSpawn(posicion.X, posicion.Y, "Portavión"); // Pasar el origen como Portavión
                     carrierAircraftCount[posicion]++; // Incrementar el contador de aviones del portaavión
                 }
             }
         }
 
-        private void EnemigosSpawn(double x, double y)
+        private void EnemigosSpawn(double x, double y, string origen)
         {
             ImageBrush enemyBrush = new ImageBrush();
             enemyBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\ariel\\Source\\AIRWAR-PROYECTOIII\\AIRWAR - PROYECTO III\\Imagen\\Plane.png"));
@@ -158,10 +158,9 @@ namespace AIRWAR___PROYECTO_III
             gameCanvas.Children.Add(newEnemy);
 
             // Crear objeto Enemy y agregarlo a la lista de enemigos
-            enemigos.Add(new Enemy(newEnemy, x, y));
+            enemigos.Add(new Enemy(newEnemy, x, y, origen));  // Pasamos el origen aquí
         }
 
-        // Función que hace que los aviones se muevan de forma continua entre los aeropuertos y portaviones
         private void MoverAviones()
         {
             var movimientoAvionTimer = new DispatcherTimer
@@ -175,12 +174,14 @@ namespace AIRWAR___PROYECTO_III
                 {
                     MoverAvion(enemigo); // Mover cada avión
                 }
+
+                // Después de mover los aviones, actualizamos las rutas
+                DrawRoutes(); // Actualizar las rutas
             };
 
             movimientoAvionTimer.Start();
         }
 
-        // Mover un avión hacia su destino
         private void MoverAvion(Enemy enemigo)
         {
             // Calcular la distancia total entre la posición actual y el destino
@@ -218,11 +219,54 @@ namespace AIRWAR___PROYECTO_III
             }
         }
 
+        // Método para dibujar las rutas con líneas punteadas entre los aviones y los aeropuertos/portaviones
+        private void DrawRoutes()
+        {
+            // Limpiar las líneas existentes
+            foreach (var line in routeLines)
+            {
+                gameCanvas.Children.Remove(line);
+            }
+
+            routeLines.Clear(); // Limpiar la lista de rutas
+
+            // Dibujar las rutas para cada avión
+            foreach (var enemigo in enemigos)
+            {
+                // Determinar el color de la línea según el origen del avión
+                var origen = new Point(enemigo.X, enemigo.Y);
+                var destino = new Point(enemigo.DestinoX, enemigo.DestinoY);
+
+                // Determinar si el avión proviene de un aeropuerto o de un portavión
+                Brush lineColor = Brushes.Red; // Default to red (for airport)
+                if (enemigo.Origen == "Portavión")
+                {
+                    // Si el avión proviene de un portavión, usar azul
+                    lineColor = Brushes.Blue;
+                }
+
+                // Crear la línea punteada con el color adecuado
+                Line routeLine = new Line
+                {
+                    X1 = origen.X + 45,
+                    Y1 = origen.Y + 45,
+                    X2 = destino.X + 45,
+                    Y2 = destino.Y + 45,
+                    Stroke = lineColor, // Asignar el color según el origen
+                    StrokeThickness = 2, // Grosor de la línea
+                    StrokeDashArray = new DoubleCollection { 2, 2 } // Patrón punteado
+                };
+
+                // Añadir la línea al Canvas
+                gameCanvas.Children.Add(routeLine);
+                routeLines.Add(routeLine); // Añadir la línea a la lista de rutas
+            }
+        }
+
         public List<Enemy> GetEnemigos()
         {
             return enemigos; // Devuelve la lista de enemigos
         }
-
     }
 
 
@@ -239,13 +283,17 @@ namespace AIRWAR___PROYECTO_III
         public bool IsInvincible { get; private set; } = false;  // Indica si el enemigo es invencible
         private DispatcherTimer stopTimer;  // Temporizador para detener al enemigo
 
-        public Enemy(Rectangle rectangulo, double x, double y)
+        // Campo para almacenar el origen (aeropuerto o portavión)
+        public string Origen { get; set; }
+
+        public Enemy(Rectangle rectangulo, double x, double y, string origen)
         {
             Rectangulo = rectangulo;
             X = x;
             Y = y;
             DestinoX = x;
             DestinoY = y;
+            Origen = origen; // Asignar el origen al crear el enemigo
 
             // Configurar el temporizador para detener el enemigo por un tiempo aleatorio
             stopTimer = new DispatcherTimer
@@ -286,8 +334,5 @@ namespace AIRWAR___PROYECTO_III
             }
         }
     }
-
-
-
 
 }
