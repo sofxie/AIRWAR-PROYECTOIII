@@ -25,16 +25,16 @@ namespace AIRWAR___PROYECTO_III
         {
             InitializeComponent();
 
+            var airportPositions = new List<(double X, double Y)> { (175, 100), (390, 200), (170, 500) };
+            var carrierPositions = new List<(double X, double Y)> { (450, 90), (80, 360), (400, 300) };
+
             Player player = new Player(Player, MyCanvas); // Inicia Jugador
             graph = new Grafo(); // Inicia Aeropuertos y PortaAviones 
-            gameLogic = new GameLogic(MyCanvas, player);  // Inicia Juego
+            gameLogic = new GameLogic(MyCanvas, player, airportPositions, carrierPositions);  // Inicia Juego
             gameLogic.StartGame();
 
 
             MyCanvas.Focus();
-
-            var airportPositions = new List<(double X, double Y)> { (175, 100), (390, 200), (170, 500) };
-            var carrierPositions = new List<(double X, double Y)> { (450, 90), (80, 360), (400, 300) };
 
             graph.PlaceNodesManually(airportPositions, carrierPositions, MyCanvas);
 
@@ -61,7 +61,7 @@ namespace AIRWAR___PROYECTO_III
             {
                 TimeSpan pressDuration = DateTime.Now - SpaceTime;
 
-                gameLogic.player.Shoot(pressDuration.TotalMilliseconds);
+                gameLogic.player.Shoot(pressDuration.TotalMilliseconds, gameLogic.GetEnemigos());
                 ClickSpace = false;
             } 
         }
