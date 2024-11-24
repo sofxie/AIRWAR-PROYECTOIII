@@ -47,7 +47,7 @@ namespace AIRWAR___PROYECTO_III
         }
         public void Shoot(double pressDuration)
         {
-            double bulletSpeed = Math.Max(200, Math.Min(800, pressDuration * 0.1)); // Velocidad limitada
+            double bulletSpeed = Math.Max(200, Math.Min(800, pressDuration * 0.5)); // Velocidad limitada
 
             Rectangle bullet = new Rectangle
             {
