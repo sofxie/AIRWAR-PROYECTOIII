@@ -17,6 +17,7 @@ namespace AIRWAR___PROYECTO_III
     public partial class MainWindow : Window
     {
         private GameLogic gameLogic; // Clase aparte para estructurar la logica
+        private Grafo graph; // Clase de grafo
         private DateTime SpaceTime; // Tiempo de inicio al presionar clic
         private bool ClickSpace = false; // El click esta presionado
 
@@ -25,10 +26,18 @@ namespace AIRWAR___PROYECTO_III
             InitializeComponent();
 
             Player player = new Player(Player, MyCanvas); // Inicia Jugador
+            graph = new Grafo(); // Inicia Aeropuertos y PortaAviones 
             gameLogic = new GameLogic(MyCanvas, player);  // Inicia Juego
             gameLogic.StartGame();
 
             MyCanvas.Focus();
+
+            var airportPositions = new List<(double X, double Y)> { (175, 100), (390, 200), (170, 500) };
+            var carrierPositions = new List<(double X, double Y)> { (450, 90), (80, 360), (400, 300) };
+
+            graph.PlaceNodesManually(airportPositions, carrierPositions, MyCanvas);
+
+            graph.GenerateRandomRoutes(0.5);
 
             ImageBrush playerImage = new ImageBrush(); // Dibuja la imagen del jugador
             playerImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\AntiAirCratf.png"));// Hay que cambiar la ruta
