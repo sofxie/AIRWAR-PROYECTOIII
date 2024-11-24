@@ -10,6 +10,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Media.Imaging;
 
 namespace AIRWAR___PROYECTO_III
 {
@@ -21,6 +22,11 @@ namespace AIRWAR___PROYECTO_III
         public Player player;
         private int score = 0;
         private int time = 60;
+        private Random rand = new Random();
+        private int xAvion = 50;
+        private int yAvion = 50;
+
+
 
         public event Action<int> Score; 
         public event Action<int> Time;   
@@ -62,6 +68,10 @@ namespace AIRWAR___PROYECTO_III
                 {
                     time--;
                     Time?.Invoke(time); // Notificar cambio en el tiempo
+                    EnemigosSpawn(this.xAvion, this.yAvion);
+                    this.xAvion += 1;
+                    this.yAvion += 1;
+
                 }
                 else
                 {
@@ -69,6 +79,7 @@ namespace AIRWAR___PROYECTO_III
                     GameOver?.Invoke(); // Notificar fin del juego
                 }
             };
+
 
             gameTimer.Start();
         }
@@ -82,6 +93,24 @@ namespace AIRWAR___PROYECTO_III
                 // Crear bala con velocidad basada en la duración del clic
                 player.Shoot(pressDuration);
             }
+        }
+        private void EnemigosSpawn(int x, int y)
+        {
+            ImageBrush enemyBrush = new ImageBrush();
+            enemyBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\ariel\\Source\\AIRWAR-PROYECTOIII\\AIRWAR - PROYECTO III\\Imagen\\Plane.png"));
+
+            Rectangle newEnemy = new Rectangle
+            {
+                Tag = "Avion",
+                Height = 50,
+                Width = 56,
+                Fill = enemyBrush
+            };
+
+            Canvas.SetTop(newEnemy, y);
+            Canvas.SetLeft(newEnemy, x);
+            gameCanvas.Children.Add(newEnemy);
+
         }
     }
 }
