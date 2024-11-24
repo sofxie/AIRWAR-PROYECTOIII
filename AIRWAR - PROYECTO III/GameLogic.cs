@@ -158,22 +158,31 @@ namespace AIRWAR___PROYECTO_III
             gameCanvas.Children.Add(newEnemy);
 
             // Crear objeto Enemy y agregarlo a la lista de enemigos
-            enemigos.Add(new Enemy(newEnemy, x, y, origen));  // Pasamos el origen aquí
+            enemigos.Add(new Enemy(newEnemy, x, y, origen, gameCanvas));  // Pasamos el origen aquí
         }
 
         private void MoverAviones()
         {
             var movimientoAvionTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(16) // El intervalo para actualizar las posiciones de los aviones
+                Interval = TimeSpan.FromMilliseconds(16)
             };
 
             movimientoAvionTimer.Tick += (s, e) =>
             {
                 foreach (var enemigo in enemigos)
                 {
-                    MoverAvion(enemigo); // Mover cada avión
+                    MoverAvion(enemigo);
+
+                    // Recargar combustible si el avión está en un aeropuerto
+                    if (enemigo.Origen == "Aeropuerto" && enemigo.X == enemigo.DestinoX && enemigo.Y == enemigo.DestinoY)
+                    {
+                        enemigo.Refuel();
+                    }
                 }
+
+                // Eliminar enemigos con combustible agotado
+                EliminarEnemigosMarcados();
 
                 // Después de mover los aviones, actualizamos las rutas
                 DrawRoutes(); // Actualizar las rutas
@@ -213,9 +222,32 @@ namespace AIRWAR___PROYECTO_III
                 enemigo.X += stepX;
                 enemigo.Y += stepY;
 
+                // Consumir combustible más rápido (ajustado el valor a 0.5 para un consumo más rápido)
+                enemigo.ConsumeFuel(0.4);  // Ajusta este valor según la velocidad de consumo del avión
+
+                // Si el avión se queda sin combustible, marcarlo para eliminarlo
+                if (enemigo.CurrentFuel == 0)
+                {
+                    enemigo.MarkForDeletion();
+                }
+
                 // Actualizar la posición del enemigo en el canvas
                 Canvas.SetLeft(enemigo.Rectangulo, enemigo.X + 10);
                 Canvas.SetTop(enemigo.Rectangulo, enemigo.Y + 10);
+
+                // Mover la barra de combustible junto con el avión
+                Canvas.SetLeft(enemigo.FuelBar, enemigo.X + 10);  // Mover la barra de combustible a la misma X que el avión
+                Canvas.SetTop(enemigo.FuelBar, enemigo.Y + 40);   // Mover la barra de combustible debajo del avión
+            }
+        }
+
+        private void EliminarEnemigosMarcados()
+        {
+            var enemigosAEliminar = enemigos.Where(e => e.IsMarkedForDeletion).ToList();
+
+            foreach (var enemigo in enemigosAEliminar)
+            {
+                enemigo.Destruir(gameCanvas, enemigos);
             }
         }
 
@@ -269,8 +301,6 @@ namespace AIRWAR___PROYECTO_III
         }
     }
 
-
-    // Clase auxiliar para almacenar la información de los enemigos
     public class Enemy
     {
         public Rectangle Rectangulo { get; }
@@ -279,21 +309,44 @@ namespace AIRWAR___PROYECTO_III
         public double DestinoX { get; set; }
         public double DestinoY { get; set; }
 
-        // Propiedades para manejar la invencibilidad y el tiempo de detención
+        private Canvas gameCanvas2;
+
+        // Barra de combustible
+        public Rectangle FuelBar { get; }
+        private double maxFuel = 100; // Máximo de combustible
+        public double CurrentFuel { get; set; } // Combustible actual
+
         public bool IsInvincible { get; private set; } = false;  // Indica si el enemigo es invencible
         private DispatcherTimer stopTimer;  // Temporizador para detener al enemigo
-
-        // Campo para almacenar el origen (aeropuerto o portavión)
+        private DispatcherTimer refuelTimer; // Temporizador para recargar combustible
         public string Origen { get; set; }
 
-        public Enemy(Rectangle rectangulo, double x, double y, string origen)
+        public bool IsMarkedForDeletion { get; private set; } = false;  // Si está marcado para eliminación
+
+        public Enemy(Rectangle rectangulo, double x, double y, string origen, Canvas gameCanvas)
         {
             Rectangulo = rectangulo;
             X = x;
             Y = y;
             DestinoX = x;
             DestinoY = y;
-            Origen = origen; // Asignar el origen al crear el enemigo
+            Origen = origen;
+            gameCanvas2 = gameCanvas;
+
+            // Configuración de la barra de combustible
+            FuelBar = new Rectangle
+            {
+                Fill = Brushes.Orange,  // Barra de combustible color naranja
+                Height = 3,
+                Width = 50 // Ancho inicial de la barra
+            };
+
+            Canvas.SetTop(FuelBar, y + 40); // Colocar la barra debajo del avión
+            Canvas.SetLeft(FuelBar, x + 10); // Ajustar la posición de la barra en el Canvas
+            gameCanvas2.Children.Add(FuelBar); // Asegúrate de añadirla al Canvas
+
+            // Inicializar el combustible
+            CurrentFuel = maxFuel;
 
             // Configurar el temporizador para detener el enemigo por un tiempo aleatorio
             stopTimer = new DispatcherTimer
@@ -302,15 +355,27 @@ namespace AIRWAR___PROYECTO_III
             };
 
             stopTimer.Tick += (s, e) => UpdateDetentionTimer();
+
+            // Temporizador para recargar el combustible
+            refuelTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(500)  // Recargar cada 500 ms (ajustable)
+            };
+            refuelTimer.Tick += (s, e) => RefuelIncrement(); // Llamar a la recarga
+
+            this.gameCanvas2 = gameCanvas2;
         }
 
         // Iniciar el tiempo de detención en el aeropuerto o portaavión
         public void StartDetentionTime()
         {
-            int randomDetentionTime = new Random().Next(1000, 5000); // Tiempo aleatorio entre 1 y 5 segundos
+            int randomDetentionTime = new Random().Next(4000, 10000); // Tiempo aleatorio entre 1 y 5 segundos
             IsInvincible = true;  // Hacer al enemigo invencible durante la detención
             stopTimer.Interval = TimeSpan.FromMilliseconds(randomDetentionTime);
             stopTimer.Start();  // Comienza el temporizador
+
+            // Comenzar el temporizador de recarga de combustible
+            refuelTimer.Start();
         }
 
         // Actualizar el temporizador de detención
@@ -319,6 +384,51 @@ namespace AIRWAR___PROYECTO_III
             // Cuando el temporizador llega a su fin, se puede mover de nuevo y ya no será invencible
             IsInvincible = false;
             stopTimer.Stop();  // Detener el temporizador
+
+            // Detener el temporizador de recarga cuando termine la detención
+            refuelTimer.Stop();
+        }
+
+        // Incrementar el combustible durante el tiempo de detención
+        private void RefuelIncrement()
+        {
+            if (CurrentFuel < maxFuel)
+            {
+                CurrentFuel += 10;  // Recargar 2 unidades de combustible por cada "tic" del temporizador
+                if (CurrentFuel > maxFuel)
+                    CurrentFuel = maxFuel;  // Asegurarse de no exceder el máximo
+
+                // Actualizar la barra de combustible
+                FuelBar.Width = (CurrentFuel / maxFuel) * 50;  // Ajustar el ancho de la barra según el combustible restante
+            }
+        }
+
+        // Consumir combustible mientras el avión se mueve
+        public void ConsumeFuel(double amount)
+        {
+            CurrentFuel -= amount;
+            if (CurrentFuel <= 0)
+            {
+                CurrentFuel = 0;
+                // Si el combustible se agota, destruir el avión
+                MarkForDeletion();
+            }
+
+            // Actualizar la barra de combustible
+            FuelBar.Width = (CurrentFuel / maxFuel) * 50;  // Ajustar el ancho de la barra según el combustible restante
+        }
+
+        // Marcar el enemigo para eliminación
+        public void MarkForDeletion()
+        {
+            IsMarkedForDeletion = true;
+        }
+
+        // Recargar combustible cuando el avión llega a un aeropuerto
+        public void Refuel()
+        {
+            CurrentFuel = maxFuel;
+            FuelBar.Width = 50;  // Recargar completamente la barra de combustible
         }
 
         public void Destruir(Canvas gameCanvas, List<Enemy> enemigos)
@@ -328,6 +438,7 @@ namespace AIRWAR___PROYECTO_III
             {
                 // Eliminar el rectángulo del Canvas
                 gameCanvas.Children.Remove(Rectangulo);
+                gameCanvas.Children.Remove(FuelBar);  // Eliminar la barra de combustible
 
                 // Eliminar el enemigo de la lista
                 enemigos.Remove(this);
@@ -336,3 +447,4 @@ namespace AIRWAR___PROYECTO_III
     }
 
 }
+
