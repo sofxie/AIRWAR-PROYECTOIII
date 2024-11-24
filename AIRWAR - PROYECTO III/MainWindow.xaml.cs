@@ -31,7 +31,7 @@ namespace AIRWAR___PROYECTO_III
             MyCanvas.Focus();
 
             ImageBrush playerImage = new ImageBrush(); // Dibuja la imagen del jugador
-            playerImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\AntiAirCratf.png"));// Hay que cambiar la ruta
+            playerImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\ariel\\Source\\AIRWAR-PROYECTOIII\\AIRWAR - PROYECTO III\\Imagen\\AntiAirCratf.png"));// Hay que cambiar la ruta
             Player.Fill = playerImage;
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
