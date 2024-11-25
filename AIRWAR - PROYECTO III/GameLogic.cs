@@ -143,7 +143,7 @@ namespace AIRWAR___PROYECTO_III
         private void EnemigosSpawn(double x, double y, string origen)
         {
             ImageBrush enemyBrush = new ImageBrush();
-            enemyBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\ariel\\Source\\AIRWAR-PROYECTOIII\\AIRWAR - PROYECTO III\\Imagen\\Plane.png"));
+            enemyBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\Plane.png"));
 
             Rectangle newEnemy = new Rectangle
             {
