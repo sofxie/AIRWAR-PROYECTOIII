@@ -369,7 +369,7 @@ namespace AIRWAR___PROYECTO_III
         // Iniciar el tiempo de detención en el aeropuerto o portaavión
         public void StartDetentionTime()
         {
-            int randomDetentionTime = new Random().Next(4000, 10000); // Tiempo aleatorio entre 1 y 5 segundos
+            int randomDetentionTime = new Random().Next(2000, 10000); // Tiempo aleatorio entre 1 y 5 segundos
             IsInvincible = true;  // Hacer al enemigo invencible durante la detención
             stopTimer.Interval = TimeSpan.FromMilliseconds(randomDetentionTime);
             stopTimer.Start();  // Comienza el temporizador
