@@ -26,8 +26,8 @@ namespace AIRWAR___PROYECTO_III
         {
             InitializeComponent();
 
-            var airportPositions = new List<(double X, double Y)> { (175, 100), (390, 200), (170, 500) };
-            var carrierPositions = new List<(double X, double Y)> { (450, 90), (80, 360), (400, 300) };
+            var airportPositions = new List<(double X, double Y)> { (130, 50), (350, 150), (170, 450) };
+            var carrierPositions = new List<(double X, double Y)> { (450, 70), (30, 330), (400, 350) };
 
             Player player = new Player(Player, MyCanvas);
             graph = new Grafo();

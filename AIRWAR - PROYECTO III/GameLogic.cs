@@ -67,41 +67,41 @@ namespace AIRWAR___PROYECTO_III
         // The rest of the code remains the same...
 
         private void STimer()
-{
-    var gameTimer = new DispatcherTimer
-    {
-        Interval = TimeSpan.FromSeconds(1)
-    };
-
-    gameTimer.Tick += (s, e) =>
-    {
-        if (time > 0)
         {
-            time--;
-            Time?.Invoke(time); // Notificar cambio en el tiempo
-
-            // Actualizar el timer
-            lblTimer.Content = $"Time: {time}s";
-
-            // Verificar si han pasado 5 segundos desde la última creación de enemigos
-            if ((DateTime.Now - lastEnemyCreationTime).TotalSeconds >= enemyCreationCooldown)
+            var gameTimer = new DispatcherTimer
             {
-                CrearEnemigosDesdePosiciones();  // Llamamos a la función para crear enemigos
-                lastEnemyCreationTime = DateTime.Now;  // Actualizamos el tiempo de la última creación
-            }
-        }
-        else
-        {
-            gameTimer.Stop();
-            GameOver?.Invoke();  // Notificar fin del juego
+                Interval = TimeSpan.FromSeconds(1)
+            };
 
-            // Llamar a la lógica para mostrar el puntaje final
-            GameOverLogic();  // Mostramos el puntaje al final del juego
-        }
-    };
+            gameTimer.Tick += (s, e) =>
+            {
+                if (time > 0)
+                {
+                    time--;
+                    Time?.Invoke(time); // Notificar cambio en el tiempo
 
-    gameTimer.Start();
-}
+                    // Actualizar el timer
+                    lblTimer.Content = $"Time: {time}s";
+
+                    // Verificar si han pasado 5 segundos desde la última creación de enemigos
+                    if ((DateTime.Now - lastEnemyCreationTime).TotalSeconds >= enemyCreationCooldown)
+                    {
+                        CrearEnemigosDesdePosiciones();  // Llamamos a la función para crear enemigos
+                        lastEnemyCreationTime = DateTime.Now;  // Actualizamos el tiempo de la última creación
+                    }
+                }
+                else
+                {
+                    gameTimer.Stop();
+                    GameOver?.Invoke();  // Notificar fin del juego
+
+                    // Llamar a la lógica para mostrar el puntaje final
+                    GameOverLogic();  // Mostramos el puntaje al final del juego
+                }
+            };
+
+            gameTimer.Start();
+        }
 
         public void StartGame()
         {
@@ -164,7 +164,7 @@ namespace AIRWAR___PROYECTO_III
         private void EnemigosSpawn(double x, double y, string origen)
         {
             ImageBrush enemyBrush = new ImageBrush();
-            enemyBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\Plane.png"));
+            enemyBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\ariel\\Source\\AIRWAR-PROYECTOIII\\AIRWAR - PROYECTO III\\Imagen\\Plane.png"));
 
             Rectangle newEnemy = new Rectangle
             {
