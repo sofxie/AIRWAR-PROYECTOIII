@@ -5,8 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AIRWAR___PROYECTO_III"
         mc:Ignorable="d"
-        Title="AIR WAR" Height="720" Width="600" 
-        >
+        Title="AIR WAR" Height="720" Width="600">
 
     <Canvas Name="MyCanvas" Focusable="True" RenderTransformOrigin="0.388,0.352" Margin="0,-1,0,1" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
         <Canvas.Background>
@@ -14,10 +13,12 @@
         </Canvas.Background>
 
         <Rectangle Height="40" Width="600" Fill="#FFF7D5A2" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Label Content="SCORE 0"  HorizontalAlignment="Center" FontWeight="Bold" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="7" Foreground="#FF3E1515"/>
-        <Label Content="TIME 0"  HorizontalAlignment="Center" FontWeight="Bold" VerticalAlignment="Top" Canvas.Left="469" Canvas.Top="6" Foreground="#FF3E1515"/>
-        <Rectangle Name="Player" Height="50" Width= "50" Fill="Yellow" Canvas.Left="275" Canvas.Top="632" HorizontalAlignment="Center" VerticalAlignment="Top">
-        </Rectangle>
 
+        <Rectangle Name="Player" Height="50" Width="50" Fill="Yellow" Canvas.Left="275" Canvas.Top="632" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+
+        <!-- Timer Label -->
+        <Label x:Name="lblTimer" Content="Time: 30s" Canvas.Left="450" Canvas.Top="0" FontSize="24" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Left" VerticalAlignment="Top"/>
     </Canvas>
+
 </Window>
+

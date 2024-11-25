@@ -23,12 +23,18 @@ namespace AIRWAR___PROYECTO_III
         private Canvas gameCanvas;
         private int score;
 
-        public event Action<int> Score;
+        public event Action<int> ScoreUpdated; // Renamed to ScoreUpdated for clarity
 
         public Player(UIElement element, Canvas canvas)
         {
             playerElement = element;
             gameCanvas = canvas;
+            score = 0; // Initial score
+        }
+
+        public int GetScore()
+        {
+            return score;  // Devuelve el puntaje actual
         }
 
         public void Move()
@@ -99,6 +105,9 @@ namespace AIRWAR___PROYECTO_III
                             // Destruir la bala y el enemigo si hay colisión y no es invencible
                             enemigo.Destruir(gameCanvas, enemigos); // Eliminar enemigo
                             gameCanvas.Children.Remove(bullet);   // Eliminar bala
+
+                            // Aumentar el puntaje cuando se mata un enemigo
+                            IncreaseScore(10);  // Puedes ajustar el puntaje por cada enemigo destruido
                         }
                         // Si el enemigo es invencible, no eliminamos la bala, solo detenemos la comprobación de colisiones
                         collisionTimer.Stop();
@@ -119,11 +128,18 @@ namespace AIRWAR___PROYECTO_III
             return bulletRect.IntersectsWith(enemyRect);  // Si se intersectan, hay colisión
         }
 
+        public void IncreaseScore(int points)
+        {
+            score += points;
+            ScoreUpdated?.Invoke(score);  // Trigger the event to update the score
+        }
+
         public UIElement GetElement()
         {
             return playerElement;
         }
     }
+
 
 
 

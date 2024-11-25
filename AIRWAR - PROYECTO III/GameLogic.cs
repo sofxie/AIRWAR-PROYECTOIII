@@ -21,7 +21,7 @@ namespace AIRWAR___PROYECTO_III
         private double PSpeed = 2; // Velocidad de movimiento de los enemigos
         public Player player;
         private int score = 0;
-        private int time = 60;
+        private int time = 30; // Timer duration
         private Random rand = new Random();
         private int xAvion = 50;
         private int yAvion = 50;
@@ -31,7 +31,10 @@ namespace AIRWAR___PROYECTO_III
         private List<Enemy> enemigos = new List<Enemy>(); // Almacenar los enemigos
         private List<Line> routeLines = new List<Line>(); // Almacena las líneas de ruta
 
-        // Limitar el número de aviones por aeropuerto y portaavión
+        private DateTime lastEnemyCreationTime;  // Para controlar el tiempo de la última creación de enemigos
+        private const int enemyCreationCooldown = 5;  // 5 segundos de espera entre creaciones de enemigos
+
+
         private Dictionary<(double X, double Y), int> airportAircraftCount = new Dictionary<(double X, double Y), int>();
         private Dictionary<(double X, double Y), int> carrierAircraftCount = new Dictionary<(double X, double Y), int>();
 
@@ -39,24 +42,66 @@ namespace AIRWAR___PROYECTO_III
         public event Action<int> Time;
         public event Action GameOver;
 
-        public GameLogic(Canvas canvas, Player player, List<(double X, double Y)> airportPositions, List<(double X, double Y)> carrierPositions)
+        private Label lblTimer; // Label to display the timer
+
+        // Modified constructor
+        public GameLogic(Canvas canvas, Player player, List<(double X, double Y)> airportPositions, List<(double X, double Y)> carrierPositions, Label timerLabel)
         {
             gameCanvas = canvas;
             this.player = player;
             this.airportPositions = airportPositions;
             this.carrierPositions = carrierPositions;
+            this.lblTimer = timerLabel; // Assign the passed Label
 
-            // Inicializamos los contadores de aviones para aeropuertos y portaaviones
             foreach (var pos in airportPositions)
             {
-                airportAircraftCount[pos] = 0; // No hay aviones iniciales
+                airportAircraftCount[pos] = 0;
             }
 
             foreach (var pos in carrierPositions)
             {
-                carrierAircraftCount[pos] = 0; // No hay aviones iniciales
+                carrierAircraftCount[pos] = 0;
             }
         }
+
+        // The rest of the code remains the same...
+
+        private void STimer()
+{
+    var gameTimer = new DispatcherTimer
+    {
+        Interval = TimeSpan.FromSeconds(1)
+    };
+
+    gameTimer.Tick += (s, e) =>
+    {
+        if (time > 0)
+        {
+            time--;
+            Time?.Invoke(time); // Notificar cambio en el tiempo
+
+            // Actualizar el timer
+            lblTimer.Content = $"Time: {time}s";
+
+            // Verificar si han pasado 5 segundos desde la última creación de enemigos
+            if ((DateTime.Now - lastEnemyCreationTime).TotalSeconds >= enemyCreationCooldown)
+            {
+                CrearEnemigosDesdePosiciones();  // Llamamos a la función para crear enemigos
+                lastEnemyCreationTime = DateTime.Now;  // Actualizamos el tiempo de la última creación
+            }
+        }
+        else
+        {
+            gameTimer.Stop();
+            GameOver?.Invoke();  // Notificar fin del juego
+
+            // Llamar a la lógica para mostrar el puntaje final
+            GameOverLogic();  // Mostramos el puntaje al final del juego
+        }
+    };
+
+    gameTimer.Start();
+}
 
         public void StartGame()
         {
@@ -80,31 +125,7 @@ namespace AIRWAR___PROYECTO_III
             movementTimer.Start();
         }
 
-        private void STimer()
-        {
-            var gameTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-
-            gameTimer.Tick += (s, e) =>
-            {
-                if (time > 0)
-                {
-                    time--;
-                    Time?.Invoke(time); // Notificar cambio en el tiempo
-                    CrearEnemigosDesdePosiciones();
-                }
-                else
-                {
-                    gameTimer.Stop();
-                    GameOver?.Invoke(); // Notificar fin del juego
-                }
-            };
-
-            gameTimer.Start();
-        }
-
+        // Método para actualizar el tiempo
         public void HandleKeyPress(Key key, DateTime pressStartTime, DateTime pressEndTime)
         {
             if (key == Key.Space)
@@ -122,7 +143,7 @@ namespace AIRWAR___PROYECTO_III
             // Crear enemigos para cada tupla en airportPositions solo si no se ha alcanzado el límite de 2 aviones
             foreach (var posicion in airportPositions)
             {
-                if (airportAircraftCount[posicion] < 2)
+                if (airportAircraftCount[posicion] < 6)
                 {
                     EnemigosSpawn(posicion.X, posicion.Y, "Aeropuerto"); // Pasar el origen como Aeropuerto
                     airportAircraftCount[posicion]++; // Incrementar el contador de aviones del aeropuerto
@@ -132,7 +153,7 @@ namespace AIRWAR___PROYECTO_III
             // Crear enemigos para cada tupla en carrierPositions solo si no se ha alcanzado el límite de 2 aviones
             foreach (var posicion in carrierPositions)
             {
-                if (carrierAircraftCount[posicion] < 2)
+                if (carrierAircraftCount[posicion] < 6)
                 {
                     EnemigosSpawn(posicion.X, posicion.Y, "Portavión"); // Pasar el origen como Portavión
                     carrierAircraftCount[posicion]++; // Incrementar el contador de aviones del portaavión
@@ -153,8 +174,8 @@ namespace AIRWAR___PROYECTO_III
                 Fill = enemyBrush
             };
 
-            Canvas.SetTop(newEnemy, y + 10);
-            Canvas.SetLeft(newEnemy, x + 10);
+            Canvas.SetTop(newEnemy, y);
+            Canvas.SetLeft(newEnemy, x);
             gameCanvas.Children.Add(newEnemy);
 
             // Crear objeto Enemy y agregarlo a la lista de enemigos
@@ -298,6 +319,11 @@ namespace AIRWAR___PROYECTO_III
         public List<Enemy> GetEnemigos()
         {
             return enemigos; // Devuelve la lista de enemigos
+        }
+        public void GameOverLogic()
+        {
+            // Mostrar puntaje final
+            MessageBox.Show($"Game Over! Your Score: {player.GetScore()}", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 
