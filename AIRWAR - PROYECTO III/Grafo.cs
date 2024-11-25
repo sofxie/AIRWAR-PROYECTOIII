@@ -22,7 +22,7 @@ namespace AIRWAR___PROYECTO_III
         }
         public void PlaceNodesManually(List<(double X, double Y)> Aeropuerto, List<(double X, double Y)> Portaaviones, Canvas canvas)
         {
-            string airportImagePath = "C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\PortaAviones.png"; // Cambia a la ruta real de tu imagen
+            string airportImagePath = "C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\Aeropuerto.png"; // Cambia a la ruta real de tu imagen
             string carrierImagePath = "C:\\Users\\sofia\\source\\repos\\AIRWAR - PROYECTO III\\AIRWAR - PROYECTO III\\Imagen\\PortaAviones.png";
             // Crear y colocar
             foreach (var position in Aeropuerto)
